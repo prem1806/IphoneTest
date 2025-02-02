@@ -4,37 +4,74 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | 360 WebGL</title>
+    <style>
+        body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* Prevent scrolling */
+          text-align: center;
+          background-color: #231F20;
+        }
+        #unity-container {
+          position: absolute;
+          /* top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%); */
+        }
+        #unity-canvas {
+          background: #231F20;
+        }
+        #fullscreen-button {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          z-index: 1000;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          border: none;
+          padding: 10px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        #fullscreen-button:hover {
+          background: rgba(0, 0, 0, 0.9);
+        }
+      </style>
   </head>
   <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <div id="game-container" style="position: relative;">
+    <div id="unity-container" style="position: relative;">
       <canvas id="unity-canvas" width="960" height="600" tabindex="-1" style="width: 960px; height: 600px; background: #231F20"></canvas>
-      <button id="expand" style="position: absolute; top: 10px; right: 10px; z-index: 10;">🔳</button>
+      <button id="fullscreen-button">🔳</button>
     </div>
     
     <script src="Build/Webgl final.loader.js"></script>
     <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device adjustments
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.head.appendChild(meta);
+      function resizeCanvas() {
+        const canvas = document.getElementById("unity-canvas");
+        const container = document.getElementById("unity-container");
 
-        var container = document.getElementById("game-container");
-        var canvas = document.getElementById("unity-canvas");
+        // Original aspect ratio of the canvas (width / height)
+        const aspectRatio = canvas.width / canvas.height;
 
-        container.style.width = "100vw";
-        container.style.height = "100vh";
-        container.style.position = "fixed";
-        container.style.top = "0";
-        container.style.left = "0";
+        // Calculate the maximum size the canvas can be while maintaining aspect ratio
+        let newWidth = window.innerWidth;
+        let newHeight = newWidth / aspectRatio;
 
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "absolute";
-        
-        document.body.style.textAlign = "left";
+        if (newHeight > window.innerHeight) {
+          newHeight = window.innerHeight;
+          newWidth = newHeight * aspectRatio;
+        }
+
+        // Apply the new width and height
+        canvas.style.width = `${newWidth}px`;
+        canvas.style.height = `${newHeight}px`;
+        container.style.width = `${newWidth}px`;
+        container.style.height = `${newHeight}px`;
       }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas(); // Call it once on load to initialize the canvas size
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Webgl final.data",
@@ -46,9 +83,9 @@
         productVersion: "0.1",
       });
 
-      const fullscreenButton = document.getElementById("expand");
+      const fullscreenButton = document.getElementById("fullscreen-button");
       fullscreenButton.addEventListener("click", () => {
-        const container = document.getElementById("game-container");
+        const container = document.getElementById("unity-container");
         alert();
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
           if (container.requestFullscreen) {
