@@ -5,43 +5,46 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | 360 WebGL</title>
     <style>
-        body {
-          margin: 0;
-          padding: 0;
-          overflow: hidden; /* Prevent scrolling */
-          text-align: center;
-          background-color: #231F20;
-        }
-        #unity-container {
-          position: absolute;
-          /* top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%); */
-        }
-        #unity-canvas {
-          background: #231F20;
-        }
-        #fullscreen-button {
-          position: absolute;
-          bottom: 10px;
-          right: 10px;
-          z-index: 1000;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          border: none;
-          padding: 10px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-        #fullscreen-button:hover {
-          background: rgba(0, 0, 0, 0.9);
-        }
-      </style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrolling */
+        text-align: center;
+        background-color: #231F20;
+      }
+      #unity-container {
+        position: absolute;
+        width: 100vw;
+        height: 90vh;
+        top: 0;
+        left: 0;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        background: #231F20;
+      }
+      #fullscreen-button {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      #fullscreen-button:hover {
+        background: rgba(0, 0, 0, 0.9);
+      }
+    </style>
   </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <div id="unity-container" style="position: relative;">
-      <canvas id="unity-canvas" width="960" height="600" tabindex="-1" style="width: 960px; height: 600px; background: #231F20"></canvas>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas"></canvas>
       <button id="fullscreen-button">🔳</button>
     </div>
     
@@ -51,27 +54,14 @@
         const canvas = document.getElementById("unity-canvas");
         const container = document.getElementById("unity-container");
 
-        // Original aspect ratio of the canvas (width / height)
-        const aspectRatio = canvas.width / canvas.height;
-
-        // Calculate the maximum size the canvas can be while maintaining aspect ratio
-        let newWidth = window.innerWidth;
-        let newHeight = newWidth / aspectRatio;
-
-        if (newHeight > window.innerHeight) {
-          newHeight = window.innerHeight;
-          newWidth = newHeight * aspectRatio;
-        }
-
-        // Apply the new width and height
-        canvas.style.width = `${newWidth}px`;
-        canvas.style.height = `${newHeight}px`;
-        container.style.width = `${newWidth}px`;
-        container.style.height = `${newHeight}px`;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        container.style.width = "100vw";
+        container.style.height = "90vh";
       }
 
       window.addEventListener("resize", resizeCanvas);
-      resizeCanvas(); // Call it once on load to initialize the canvas size
+      resizeCanvas(); // Initialize size on page load
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
         dataUrl: "Build/Webgl final.data",
@@ -85,19 +75,18 @@
 
       const fullscreenButton = document.getElementById("fullscreen-button");
       fullscreenButton.addEventListener("click", () => {
-        const container = document.getElementById("unity-container");
-        alert();
+        const doc = document.documentElement; // Use entire document for fullscreen
+        window.scrollTo(0, 0); // Prevents shifting on iOS
+
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          if (container.requestFullscreen) {
-            container.requestFullscreen();
-          } else if (container.mozRequestFullScreen) { // Firefox
-            container.mozRequestFullScreen();
-          } else if (container.webkitRequestFullscreen) { // Chrome, Safari, Opera
-            container.webkitRequestFullscreen();
-          } else if (container.msRequestFullscreen) { // IE/Edge
-            container.msRequestFullscreen();
-          } else if (container.webkitEnterFullscreen) { // iOS (Safari)
-            container.webkitEnterFullscreen();
+          if (doc.requestFullscreen) {
+            doc.requestFullscreen();
+          } else if (doc.mozRequestFullScreen) { // Firefox
+            doc.mozRequestFullScreen();
+          } else if (doc.webkitRequestFullscreen) { // Chrome, Safari, Opera
+            doc.webkitRequestFullscreen();
+          } else if (doc.msRequestFullscreen) { // IE/Edge
+            doc.msRequestFullscreen();
           }
         } else {
           if (document.exitFullscreen) {
