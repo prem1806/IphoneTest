@@ -49,7 +49,7 @@
       const fullscreenButton = document.getElementById("expand");
       fullscreenButton.addEventListener("click", () => {
         const container = document.getElementById("game-container");
-
+        alert();
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
           if (container.requestFullscreen) {
             container.requestFullscreen();
