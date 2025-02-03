@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Moxy Bengaluru Airport Prestige Tech Cloud</title>
+    <title>Unity WebGL | Moxy Bengaluru</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
     <style>
       body {
@@ -58,6 +58,12 @@
         canvas.height = window.innerHeight;
       }
 
+      function hideAddressBar() {
+        setTimeout(() => {
+          window.scrollTo(0, 1); // Hides Safari address bar
+        }, 100);
+      }
+
       function lockOrientation() {
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock("landscape").catch(err => console.warn("Orientation lock failed:", err));
@@ -66,7 +72,7 @@
 
       function goFullscreen() {
         const elem = document.documentElement; // Use entire document for fullscreen
-        window.scrollTo(0, 0); // Prevents shifting on iOS
+        hideAddressBar(); // Ensures address bar is hidden
 
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
           if (elem.requestFullscreen) {
@@ -93,6 +99,7 @@
         }
 
         lockOrientation();
+        setTimeout(resizeCanvas, 500); // Resize canvas after fullscreen
       }
 
       window.addEventListener("resize", resizeCanvas);
