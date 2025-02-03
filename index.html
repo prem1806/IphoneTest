@@ -26,17 +26,18 @@
         background: #231F20;
       }
       #expand-btn {
-        position: absolute;
-        bottom: 60px;
-        right: 60px;
+        position: fixed; /* Ensures button is always accessible */
+        bottom: 15px;
+        right: 15px;
         z-index: 1000;
         background: rgba(0, 0, 0, 0.7);
         color: white;
         border: none;
-        padding: 10px;
-        border-radius: 5px;
+        padding: 12px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 18px;
+        outline: none;
       }
       #expand-btn:hover {
         background: rgba(0, 0, 0, 0.9);
@@ -46,7 +47,7 @@
   <body>
     <div id="unity-container">
       <canvas id="unity-canvas"></canvas>
-      <button id="expand-btn">Expand</button>
+      <button id="expand-btn">🔳 Expand</button>
     </div>
     
     <script src="Build/moxy_05_dec_1.loader.js"></script>
@@ -64,18 +65,20 @@
       }
 
       function goFullscreen() {
-        const doc = document.documentElement; // Use entire document for fullscreen
+        const elem = document.documentElement; // Use entire document for fullscreen
         window.scrollTo(0, 0); // Prevents shifting on iOS
 
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          if (doc.requestFullscreen) {
-            doc.requestFullscreen();
-          } else if (doc.mozRequestFullScreen) {
-            doc.mozRequestFullScreen();
-          } else if (doc.webkitRequestFullscreen) {
-            doc.webkitRequestFullscreen();
-          } else if (doc.msRequestFullscreen) {
-            doc.msRequestFullscreen();
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+          } else if (elem.webkitEnterFullscreen) { // iOS Safari
+            elem.webkitEnterFullscreen();
           }
         } else {
           if (document.exitFullscreen) {
@@ -105,7 +108,9 @@
         productVersion: "0.1",
       });
 
-      document.getElementById("expand-btn").addEventListener("click", goFullscreen);
+      const fullscreenButton = document.getElementById("expand-btn");
+      fullscreenButton.addEventListener("click", goFullscreen);
+      fullscreenButton.addEventListener("touchstart", goFullscreen); // iOS fix
     </script>
   </body>
 </html>
