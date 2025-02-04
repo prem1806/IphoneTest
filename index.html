@@ -89,6 +89,13 @@
       window.addEventListener('resize', () => {
         resizeCanvas();
       });
+
+      // iOS-specific: Hide address bar on page load
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 300);
+      });
     </script>
   </body>
 </html>
