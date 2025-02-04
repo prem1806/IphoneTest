@@ -4,119 +4,76 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL | Moxy Bengaluru</title>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden; /* Prevent scrolling */
-        text-align: center;
-        background-color: #231F20;
-      }
-      #unity-container {
-        width: 100vw;
-        height: 100vh;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      #unity-canvas {
-        width: 100%;
-        height: 100%;
-        background: #231F20;
-      }
-      #expand-btn {
-        position: fixed; /* Ensures button is always accessible */
-        bottom: 15px;
-        right: 15px;
-        z-index: 1000;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 18px;
-        outline: none;
-      }
-      #expand-btn:hover {
-        background: rgba(0, 0, 0, 0.9);
-      }
+      /* @supports (padding: max(0px)) {
+          body {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                    env(safe-area-inset-bottom) env(safe-area-inset-left);
+          }
+        }
+
+        canvas {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+        } */
+
     </style>
   </head>
   <body>
-    <div id="unity-container">
-      <canvas id="unity-canvas"></canvas>
-      <button id="expand-btn">🔳 Expand</button>
+    <div id="parent">
+      <canvas id="myCanvas" width="200" height="100" style="border:1px solid #d3d3d3;">
+        Your browser does not support the HTML canvas tag.</canvas>
+        <button id="expand-btn">
+          expand
+        </button>
     </div>
-    
-    <script src="Build/moxy_05_dec_1.loader.js"></script>
     <script>
-      function resizeCanvas() {
-        const canvas = document.getElementById("unity-canvas");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      var c = document.getElementById("myCanvas");
+      var ctx = c.getContext("2d");
+      ctx.font = "30px Arial";
+      ctx.fillText("Hello World",10,50);
 
-      function hideAddressBar() {
-        setTimeout(() => {
-          window.scrollTo(0, 1); // Hides Safari address bar
-        }, 100);
-      }
-
-      function lockOrientation() {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch(err => console.warn("Orientation lock failed:", err));
-        }
-      }
-
-      function goFullscreen() {
-          const elem = document.documentElement; // Use entire document for fullscreen
-          hideAddressBar(); // Ensures address bar is hidden
-
-          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-              if (elem.requestFullscreen) {
-                  elem.requestFullscreen();
-              } else if (elem.mozRequestFullScreen) {
-                  elem.mozRequestFullScreen();
-              } else if (elem.webkitRequestFullscreen) {
-                  elem.webkitRequestFullscreen();
-              } else if (elem.msRequestFullscreen) {
-                  elem.msRequestFullscreen();
-              }
-          } else {
-              if (document.exitFullscreen) {
-                  document.exitFullscreen();
-              } else if (document.mozCancelFullScreen) {
-                  document.mozCancelFullScreen();
-              } else if (document.webkitExitFullscreen) {
-                  document.webkitExitFullscreen();
-              } else if (document.msExitFullscreen) {
-                  document.msExitFullscreen();
-              }
+      document.getElementById('expand-btn').onclick = async () => {
+        try {
+          const docElem = document.documentElement;
+          
+          if (docElem.webkitRequestFullscreen) { // iOS-specific handling
+            await docElem.webkitRequestFullscreen();
+            window.scrollTo(0, 1);
+          } else { // Standard browsers
+            if (c.requestFullscreen) await c.requestFullscreen();
+            else if (c.webkitRequestFullscreen) await c.webkitRequestFullscreen();
           }
+          
+          // Post-fullscreen adjustments
+          setTimeout(() => {
+            window.scrollTo(0, 1);
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+          }, 300);
+        } catch (error) {
+          console.error('Fullscreen failed:', error);
+        }
+      };
 
-          lockOrientation();
-          setTimeout(resizeCanvas, 500); // Resize canvas after fullscreen
-      }
+      window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        ctx.font = "30px Arial";
+        ctx.fillText("Hello World",10,50);
+      }, 500);
+    });
 
 
-      window.addEventListener("resize", resizeCanvas);
-      resizeCanvas(); // Initialize size on load
-
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/moxy_05_dec_1.data",
-        frameworkUrl: "Build/moxy_05_dec_1.framework.js",
-        codeUrl: "Build/moxy_05_dec_1.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "LifeVR",
-        productName: "Moxy Bengaluru Airport Prestige Tech Cloud",
-        productVersion: "0.1",
-      });
-
-      const fullscreenButton = document.getElementById("expand-btn");
-      fullscreenButton.addEventListener("click", goFullscreen);
-      fullscreenButton.addEventListener("touchstart", goFullscreen); // iOS fix
     </script>
   </body>
 </html>
