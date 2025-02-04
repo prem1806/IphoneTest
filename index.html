@@ -3,77 +3,92 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL | Moxy Bengaluru</title>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Fullscreen Canvas Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
-      /* @supports (padding: max(0px)) {
-          body {
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
-                    env(safe-area-inset-bottom) env(safe-area-inset-left);
-          }
-        }
-
-        canvas {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-        } */
-
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+      }
+      #parent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      #myCanvas {
+        border: 1px solid #d3d3d3;
+        background-color: #ffffff;
+      }
+      #expand-btn {
+        position: absolute;
+        bottom: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <div id="parent">
-      <canvas id="myCanvas" width="200" height="100" style="border:1px solid #d3d3d3;">
-        Your browser does not support the HTML canvas tag.</canvas>
-        <button id="expand-btn">
-          expand
-        </button>
+      <canvas id="myCanvas" width="200" height="100">
+        Your browser does not support the HTML canvas tag.
+      </canvas>
+      <button id="expand-btn">Expand</button>
     </div>
-    <script>
-      var c = document.getElementById("myCanvas");
-      var ctx = c.getContext("2d");
-      ctx.font = "30px Arial";
-      ctx.fillText("Hello World",10,50);
 
+    <script>
+      const c = document.getElementById("myCanvas");
+      const ctx = c.getContext("2d");
+
+      // Draw initial content on the canvas
+      ctx.font = "30px Arial";
+      ctx.fillText("Hello World", 10, 50);
+
+      // Fullscreen logic
       document.getElementById('expand-btn').onclick = async () => {
         try {
-          const docElem = document.documentElement;
-          
-          if (docElem.webkitRequestFullscreen) { // iOS-specific handling
-            await docElem.webkitRequestFullscreen();
-            window.scrollTo(0, 1);
-          } else { // Standard browsers
-            if (c.requestFullscreen) await c.requestFullscreen();
-            else if (c.webkitRequestFullscreen) await c.webkitRequestFullscreen();
+          if (c.requestFullscreen) {
+            await c.requestFullscreen();
+          } else if (c.webkitRequestFullscreen) { // Safari-specific
+            await c.webkitRequestFullscreen();
+          } else if (c.msRequestFullscreen) { // IE/Edge
+            await c.msRequestFullscreen();
           }
-          
-          // Post-fullscreen adjustments
+
+          // iOS-specific: Scroll to hide the address bar
           setTimeout(() => {
             window.scrollTo(0, 1);
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
+            resizeCanvas();
           }, 300);
         } catch (error) {
           console.error('Fullscreen failed:', error);
         }
       };
 
-      window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        window.scrollTo(0, 1);
+      // Resize canvas to fit the screen
+      function resizeCanvas() {
         c.width = window.innerWidth;
         c.height = window.innerHeight;
         ctx.font = "30px Arial";
-        ctx.fillText("Hello World",10,50);
-      }, 500);
-    });
+        ctx.fillText("Hello World", 10, 50);
+      }
 
+      // Handle orientation change
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+          resizeCanvas();
+        }, 500);
+      });
 
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+      });
     </script>
   </body>
 </html>
