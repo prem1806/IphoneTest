@@ -51,6 +51,7 @@
       // Fullscreen logic
       document.getElementById('expand-btn').onclick = async () => {
         try {
+          // Attempt to enter fullscreen mode
           if (c.requestFullscreen) {
             await c.requestFullscreen();
           } else if (c.webkitRequestFullscreen) { // Safari-specific
@@ -92,6 +93,13 @@
 
       // iOS-specific: Hide address bar on page load
       window.addEventListener('load', () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 300);
+      });
+
+      // iOS-specific: Hide address bar on touch events
+      document.addEventListener('touchstart', () => {
         setTimeout(() => {
           window.scrollTo(0, 1);
         }, 300);
