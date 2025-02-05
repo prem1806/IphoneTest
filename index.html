@@ -1,109 +1,131 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Fullscreen Canvas Example</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Unity WebGL | Moxy Bengaluru</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        height: 100%;
-      }
-      #parent {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f0f0f0;
-      }
-      #myCanvas {
-        border: 1px solid #d3d3d3;
-        background-color: #ffffff;
-      }
-      #expand-btn {
-        position: absolute;
-        bottom: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            text-align: center;
+            background-color: #231F20;
+        }
+        #unity-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed; /* Use fixed positioning */
+            top: 0;
+            left: 0;
+        }
+        #unity-canvas {
+            width: 100%;
+            height: 100%;
+            background: #231F20;
+        }
+        #expand-btn {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            outline: none;
+        }
+        #expand-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
     </style>
-  </head>
-  <body>
-    <div id="parent">
-      <canvas id="myCanvas" width="200" height="100">
-        Your browser does not support the HTML canvas tag.
-      </canvas>
-      <button id="expand-btn">Expand</button>
+</head>
+<body>
+    <div id="unity-container">
+        <canvas id="unity-canvas"></canvas>
+        <button id="expand-btn">🔳 Expand</button>
     </div>
 
+    <script src="Build/moxy_05_dec_1.loader.js"></script>
     <script>
-      const c = document.getElementById("myCanvas");
-      const ctx = c.getContext("2d");
+        let unityInstance; // Store the Unity instance
 
-      // Draw initial content on the canvas
-      ctx.font = "30px Arial";
-      ctx.fillText("Hello World", 10, 50);
-
-      // Fullscreen logic
-      document.getElementById('expand-btn').onclick = async () => {
-        try {
-          // Attempt to enter fullscreen mode
-          if (c.requestFullscreen) {
-            await c.requestFullscreen();
-          } else if (c.webkitRequestFullscreen) { // Safari-specific
-            await c.webkitRequestFullscreen();
-          } else if (c.msRequestFullscreen) { // IE/Edge
-            await c.msRequestFullscreen();
-          }
-
-          // iOS-specific: Scroll to hide the address bar
-          setTimeout(() => {
-            window.scrollTo(0, 1);
-            resizeCanvas();
-          }, 300);
-        } catch (error) {
-          console.error('Fullscreen failed:', error);
+        function resizeCanvas() {
+            if (unityInstance) { // Check if Unity instance exists
+                const canvas = document.getElementById("unity-canvas");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                unityInstance.Module.SendMessage('GameManager', 'OnScreenResize'); // Example: Notify Unity
+            }
         }
-      };
 
-      // Resize canvas to fit the screen
-      function resizeCanvas() {
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
-        ctx.font = "30px Arial";
-        ctx.fillText("Hello World", 10, 50);
-      }
 
-      // Handle orientation change
-      window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-          resizeCanvas();
-        }, 500);
-      });
+        function hideAddressBar() {
+            window.scrollTo(0, 1);
+        }
 
-      // Handle window resize
-      window.addEventListener('resize', () => {
-        resizeCanvas();
-      });
+        function lockOrientation() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(err => console.warn("Orientation lock failed:", err));
+            }
+        }
 
-      // iOS-specific: Hide address bar on page load
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-        }, 300);
-      });
+        function goFullscreen() {
+            let elem = document.documentElement;
 
-      // iOS-specific: Hide address bar on touch events
-      document.addEventListener('touchstart', () => {
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-        }, 300);
-      });
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+
+            // Call these *after* the fullscreen request
+            setTimeout(() => {
+                hideAddressBar(); // Hide address bar *after* fullscreen
+                lockOrientation();   // Attempt orientation lock after fullscreen
+                resizeCanvas();      // Resize canvas after a short delay
+            }, 250); // Increased delay
+        }
+
+
+        window.addEventListener("resize", resizeCanvas);
+
+        createUnityInstance(document.querySelector("#unity-canvas"), {
+            dataUrl: "Build/moxy_05_dec_1.data",
+            frameworkUrl: "Build/moxy_05_dec_1.framework.js",
+            codeUrl: "Build/moxy_05_dec_1.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "LifeVR",
+            productName: "Moxy Bengaluru Airport Prestige Tech Cloud",
+            productVersion: "0.1",
+        }).then(instance => {
+            unityInstance = instance; // Store the instance
+            resizeCanvas(); // Initial resize after Unity loads
+        });
+
+        const fullscreenButton = document.getElementById("expand-btn");
+        fullscreenButton.addEventListener("click", goFullscreen);
+        fullscreenButton.addEventListener("touchstart", goFullscreen); // iOS fix
     </script>
-  </body>
+</body>
 </html>
